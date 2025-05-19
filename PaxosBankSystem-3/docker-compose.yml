@@ -1,0 +1,71 @@
+version: '3.9'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    environment:
+      SA_PASSWORD: "NewStrong!Pass123"  # Stronger password for 'sa' login
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    networks:
+      - paxos-network
+
+  node1:
+    build:
+      context: ./Node1
+    ports:
+      - "5090:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=PaxosBankSystem00;User Id=NewLogin;Password=NewLogin!123;TrustServerCertificate=True;
+    depends_on:
+      - sqlserver
+    entrypoint: >
+      sh -c "
+      sleep 10 && /opt/mssql-tools/bin/sqlcmd -S sqlserver -U NewLogin -P NewLogin!123 -Q 'SELECT 1' 
+      || (echo 'Waiting for SQL Server to start...' && sleep 10);
+      dotnet Node1.dll"
+    networks:
+      - paxos-network
+
+  node2:
+    build:
+      context: ./Node2
+    ports:
+      - "5085:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=PaxosBankSystem00;User Id=NewLogin;Password=NewLogin!123;TrustServerCertificate=True;
+    depends_on:
+      - sqlserver
+    entrypoint: >
+      sh -c "
+      sleep 10 && /opt/mssql-tools/bin/sqlcmd -S sqlserver -U NewLogin -P NewLogin!123 -Q 'SELECT 1' 
+      || (echo 'Waiting for SQL Server to start...' && sleep 10);
+      dotnet Node2.dll"
+    networks:
+      - paxos-network
+
+  node3:
+    build:
+      context: ./Node3
+    ports:
+      - "5086:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=PaxosBankSystem00;User Id=NewLogin;Password=NewLogin!123;TrustServerCertificate=True;
+    depends_on:
+      - sqlserver
+    entrypoint: >
+      sh -c "
+      sleep 10 && /opt/mssql-tools/bin/sqlcmd -S sqlserver -U NewLogin -P NewLogin!123 -Q 'SELECT 1' 
+      || (echo 'Waiting for SQL Server to start...' && sleep 10);
+      dotnet Node3.dll"
+    networks:
+      - paxos-network
+
+networks:
+  paxos-network:
+    driver: bridge
