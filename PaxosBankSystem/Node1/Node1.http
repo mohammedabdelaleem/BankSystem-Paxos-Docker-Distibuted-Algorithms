@@ -1,0 +1,16 @@
+@Node1_HostAddress = http://localhost:5084
+
+GET {{Node1_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+### Propose from node1
+POST http://localhost:5001/api/paxos/propose
+Content-Type: application/json
+
+{
+  "FromUserId": 1,
+  "ToUserId": 2,
+  "Amount": 100
+}
